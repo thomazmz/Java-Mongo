@@ -1,31 +1,3 @@
-# API de uma plataforma de receitas
-
-Neste desafio você criará uma API para uma plataforma de receitas.
-
-## Tópicos
-
-Neste desafio você aprenderá:
-
-* Java
-* Spring MVC
-* MongoDB
-
-## Requisitos
-
-Para este desafio você precisará de:
-
-- Java 8 (ou superior)
-- Git
-- MongoDB 4.0 (ou superior)
-
-## MongoDB
-
-Instalar o MongoDB e rodar na porta padrão `27017`
-
-https://docs.mongodb.com/manual/installation
-
-## Detalhes
-
 A receita deve ser salva na collection `recipe` e seguir o seguinte esquema:
 
 ```json
