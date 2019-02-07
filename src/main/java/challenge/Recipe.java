@@ -21,10 +21,8 @@ public class Recipe implements Serializable {
 
     private List<String> ingredients;
 
-    @JsonIgnore
     private List<String> likes;
 
-    @JsonIgnore
     private List<RecipeComment> recipeComments;
 
     // Constructors
@@ -114,7 +112,7 @@ public class Recipe implements Serializable {
     }
 
     public void removeRecipeComment (String commentId) {
-        this.recipeComments.remove(commentId);
+        this.recipeComments.removeIf(obj -> obj.getId() == commentId);
     }
 
 }

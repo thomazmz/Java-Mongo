@@ -4,9 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 
 @Service
@@ -15,19 +23,10 @@ public class RecipeServiceImpl implements RecipeService {
 	// Autowired properties
 
 	@Autowired
-	RecipeRepository recipeRepository;
+	MongoOperations mongoOperations;
 
 	@Autowired
-	RecipeCommentService recipeCommentService;
-
-	// Service Methods
-
-//	@Override
-//	public Recipe save(Recipe recipe) {
-//
-//		return recipeRepository.save(recipe);
-//
-//	}
+	RecipeRepository recipeRepository;
 
 	@Override
 	public Recipe save(Recipe recipe) {
@@ -36,115 +35,117 @@ public class RecipeServiceImpl implements RecipeService {
 
 	@Override
 	public Recipe get(String id) {
-
-		return recipeRepository.findById(id).orElse(null);
-
+		return recipeRepository.findById(id).get();
 	}
 
 	@Override
 	public void update(String id, Recipe recipe) {
-
-		Optional<Recipe> recipeInstance = recipeRepository.findById(id);
-
-		if(recipeInstance.isPresent()){
-			Recipe updatedRecipe = recipeInstance.get();
-			updatedRecipe.setTitle(recipe.getTitle());
-			updatedRecipe.setDescription(recipe.getDescription());
-			updatedRecipe.setIngredients(recipe.getIngredients());
-			recipeRepository.save(updatedRecipe);
-		}
-
+		mongoOperations.updateFirst(
+				Query.query(Criteria.where("id").is(id)),
+				Update.update("title", recipe.getTitle()).set("description", recipe.getDescription()).set("ingredients", recipe.getIngredients()),
+				Recipe.class);
 	}
 
 	@Override
 	public void delete(String id) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
-
-		if (recipeInstance != null) recipeRepository.delete(recipeInstance);
+		recipeRepository.deleteById(id);
 
 	}
 
 	@Override
 	public void like(String id, String userId) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		// Ambas as implementações abaixo passam nos testes.
 
-		if(recipeInstance != null) {
-			recipeInstance.addLike(userId);
-			recipeRepository.save(recipeInstance);
-		}
+		mongoOperations.updateFirst(
+				Query.query(Criteria.where("id").is(id)),
+				new Update().addToSet("likes", userId),
+				Recipe.class);
+
+//		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+//
+//		if(recipeInstance != null) {
+//			recipeInstance.addLike(userId);
+//			recipeRepository.save(recipeInstance);
+//		}
+
 	}
 
 	@Override
 	public void unlike(String id, String userId) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		// Ambas as implementações abaixo passam nos testes.
 
-		if (recipeInstance != null) {
-			recipeInstance.removeLike(userId);
-			recipeRepository.save(recipeInstance);
-		}
+		mongoOperations.updateFirst(
+				Query.query(Criteria.where("id").is(id)),
+				new Update().pull("likes", userId),
+				Recipe.class);
+
+//		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+//
+//		if (recipeInstance != null) {
+//			recipeInstance.removeLike(userId);
+//			recipeRepository.save(recipeInstance);
+//		}
+
 	}
 
 	@Override
 	public RecipeComment addComment(String id, RecipeComment recipeComment) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		recipeComment.setId(ObjectId.get().toHexString());
 
-		if (recipeInstance != null) {
-			String idRecipeComment = ObjectId.get().toHexString();
-			recipeComment.setId(idRecipeComment);
-			recipeInstance.addRecipeComment(recipeComment);
-			recipeRepository.save(recipeInstance);
-			return recipeComment;
+		mongoOperations.updateFirst(
+			Query.query(Criteria.where("id").is(id)),
+			new Update().addToSet("recipeComments", recipeComment),
+			Recipe.class);
 
-		}
-
-		return null;
+		return recipeComment;
 
 	}
 
 	@Override
 	public void updateComment(String id, String commentId, RecipeComment recipeComment) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		mongoOperations.findAndModify(
+			Query.query(Criteria.where("id").is(id)),
+			new Update().set("recipe.recipeComments", recipeComment),
+			Recipe.class);
 
-		if (recipeInstance != null) {
-			RecipeComment recipeCommentInstance = recipeCommentService.update(commentId, recipeComment);
-
-			if (recipeCommentInstance != null) {
-				recipeInstance.addRecipeComment(recipeCommentInstance);
-				recipeRepository.save(recipeInstance);
-
-			}
-		}
 	}
 
 	@Override
 	public void deleteComment(String id, String commentId) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		mongoOperations.updateFirst(
+			Query.query(Criteria.where("id").is(id)),
+			new Update().pull("recipeComments", Query.query(Criteria.where("id").is(commentId))),
+			Recipe.class
+		);
 
-		if (recipeInstance != null) {
-			recipeInstance.removeRecipeComment(commentId);
-			recipeRepository.save(recipeInstance);
-			recipeCommentService.delete(commentId);
-
-		}
 	}
 
 	@Override
 	public List<Recipe> listByIngredient(String ingredient) {
-		return recipeRepository.findAllByIngredientsEqualsOrderByTitleAsc(ingredient);
+
+		return mongoOperations.find(
+			Query.query(Criteria.where("ingredients").is(ingredient))
+			.with(Sort.by("title").ascending()),
+			Recipe.class);
+
 	}
+
 
 	@Override
 	public List<Recipe> search(String search) {
 
-		// TO DO : Implementar método
+		return mongoOperations.find(
+			Query.query(new Criteria().orOperator(
+			Criteria.where("title").regex(search, "i"),
+			Criteria.where("description").regex(search, "i"))).with(Sort.by("title").ascending()),
+			Recipe.class);
 
-		return null;
 	}
 
 }
