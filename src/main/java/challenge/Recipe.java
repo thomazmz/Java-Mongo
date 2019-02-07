@@ -6,10 +6,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
 
-@Document(collection = "Recipe")
+@Document(collection = "recipe")
 public class Recipe implements Serializable {
 
     @Id
@@ -21,9 +21,11 @@ public class Recipe implements Serializable {
 
     private List<String> ingredients;
 
-    private List<String> likes = new ArrayList<>();
+    @JsonIgnore
+    private List<String> likes;
 
-    private LinkedHashMap<String, RecipeComment> recipeComments = new LinkedHashMap<>();
+    @JsonIgnore
+    private List<RecipeComment> recipeComments;
 
     // Constructors
 
@@ -54,13 +56,11 @@ public class Recipe implements Serializable {
         return this.ingredients;
     }
 
-    @JsonIgnore
     public List<String> getLikes() {
         return this.likes;
     }
 
-    @JsonIgnore
-    public LinkedHashMap<String, RecipeComment> getRecipeComments() {
+    public List<RecipeComment> getRecipeComments() {
         return this.recipeComments;
     }
 
@@ -87,10 +87,18 @@ public class Recipe implements Serializable {
         this.likes = likes;
     }
 
+    public void setRecipeComments(List<RecipeComment> comments) {
+        this.recipeComments = comments;
+    }
+
     // Methods
 
     public void addLike (String userId) {
-        this.likes.add(userId);
+        if(this.likes != null) {
+            this.likes.add(userId);
+        } else {
+            this.setLikes(Arrays.asList(userId));
+        }
     }
 
     public void removeLike (String userId) {
@@ -98,7 +106,11 @@ public class Recipe implements Serializable {
     }
 
     public void addRecipeComment (RecipeComment recipeComment) {
-        this.recipeComments.put(recipeComment.getId(), recipeComment);
+        if(this.recipeComments != null) {
+            this.recipeComments.add(recipeComment);
+        } else {
+            this.setRecipeComments(Arrays.asList(recipeComment));
+        }
     }
 
     public void removeRecipeComment (String commentId) {

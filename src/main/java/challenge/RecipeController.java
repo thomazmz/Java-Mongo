@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class RecipeController {
 
@@ -13,27 +15,28 @@ public class RecipeController {
 	@Autowired
 	private RecipeFactory recipeFactory;
 
-	@GetMapping("/")
-	public String returnHello() {
-		return "Hello World";
-	}
+//	@PostMapping("/recipe")
+//	public ResponseEntity<?> save(@RequestBody Recipe recipe) {
+//		return new ResponseEntity<>(recipeService.save(recipe), HttpStatus.OK);
+//	}
 
 	@PostMapping("/recipe")
-	public ResponseEntity<?> save(@RequestBody Recipe recipe) {
-		return new ResponseEntity<>(recipeService.save(recipe), HttpStatus.OK);
-	}
+	public Recipe save(@RequestBody Recipe recipe) { return recipeService.save(recipe);}
 
 	@GetMapping("/recipe/{id}")
-	public ResponseEntity<?> get(@PathVariable(value = "id") String id) {
+	public RecipeDto get(@PathVariable(value = "id") String id) {
+//	public ResponseEntity<?> get(@PathVariable(value = "id") String id) {
 		Recipe recipeInstance = recipeService.get(id);
-		if (recipeInstance == null) return new ResponseEntity<>("Conteúdo não encontrado", HttpStatus.OK);
-		else return new ResponseEntity<>(recipeFactory.getInstance(recipeInstance), HttpStatus.OK);
+//		if (recipeInstance == null) return new ResponseEntity<>(HttpStatus.OK);
+//		else return new ResponseEntity<>(recipeFactory.getInstance(recipeInstance), HttpStatus.OK);
+		return recipeFactory.getInstance(recipeInstance);
 	}
 
 	@PutMapping("/recipe/{id}")
-	public ResponseEntity<?> update(@PathVariable(value = "id") String id, @RequestBody Recipe recipe) {
+	public void update(@PathVariable(value = "id") String id, @RequestBody Recipe recipe) {
+//	public ResponseEntity<?> update(@PathVariable(value = "id") String id, @RequestBody Recipe recipe) {
 		recipeService.update(id, recipe);
-		return new ResponseEntity(HttpStatus.OK);
+//		return new ResponseEntity(HttpStatus.OK);
 	}
 
 	@DeleteMapping("/recipe/{id}")
@@ -71,13 +74,14 @@ public class RecipeController {
 		return new ResponseEntity(HttpStatus.OK);
 	}
 
+	@GetMapping("/recipe/ingredient")
+	public ResponseEntity<?>  listByIngredient(@RequestParam("ingredient") String ingredient) {
+		return new ResponseEntity<>(recipeService.listByIngredient(ingredient), HttpStatus.OK);
+	}
 
-//	public List<Recipe> listByIngredient() {
-//		return recipeService.listByIngredient(null);
-//	}
-
-//	public List<Recipe> search() {
-//		return recipeService.search(null);
-//	}
+	@GetMapping("/recipe/search")
+	public List<Recipe> search() {
+		return null;
+	}
 
 }

@@ -36,6 +36,10 @@ public class RecipeComment implements Serializable {
 
     // Setters
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public void setComment(String comment) {
         this.comment = comment;
     }

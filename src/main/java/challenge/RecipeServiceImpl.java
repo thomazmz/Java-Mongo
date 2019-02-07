@@ -1,6 +1,9 @@
 package challenge;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +22,16 @@ public class RecipeServiceImpl implements RecipeService {
 
 	// Service Methods
 
+//	@Override
+//	public Recipe save(Recipe recipe) {
+//
+//		return recipeRepository.save(recipe);
+//
+//	}
+
 	@Override
 	public Recipe save(Recipe recipe) {
-
 		return recipeRepository.save(recipe);
-
 	}
 
 	@Override
@@ -36,15 +44,16 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public void update(String id, Recipe recipe) {
 
-		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
+		Optional<Recipe> recipeInstance = recipeRepository.findById(id);
 
-		if(recipeInstance != null) {
-			recipeInstance.setDescription(recipe.getDescription());
-			recipeInstance.setTitle(recipe.getTitle());
-			recipeInstance.setIngredients(recipe.getIngredients());
-			recipeRepository.save(recipeInstance);
-
+		if(recipeInstance.isPresent()){
+			Recipe updatedRecipe = recipeInstance.get();
+			updatedRecipe.setTitle(recipe.getTitle());
+			updatedRecipe.setDescription(recipe.getDescription());
+			updatedRecipe.setIngredients(recipe.getIngredients());
+			recipeRepository.save(updatedRecipe);
 		}
+
 	}
 
 	@Override
@@ -84,7 +93,9 @@ public class RecipeServiceImpl implements RecipeService {
 		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
 
 		if (recipeInstance != null) {
-			recipeInstance.addRecipeComment(recipeCommentService.save(recipeComment));
+			String idRecipeComment = ObjectId.get().toHexString();
+			recipeComment.setId(idRecipeComment);
+			recipeInstance.addRecipeComment(recipeComment);
 			recipeRepository.save(recipeInstance);
 			return recipeComment;
 
@@ -125,10 +136,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 	@Override
 	public List<Recipe> listByIngredient(String ingredient) {
-
-		// TO DO : Implementar método
-
-		return null;
+		return recipeRepository.findAllByIngredientsEqualsOrderByTitleAsc(ingredient);
 	}
 
 	@Override

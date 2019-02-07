@@ -16,9 +16,7 @@ public class RecipeFactory {
         recipeDto.setDescription(recipe.getDescription());
         recipeDto.setIngredients(recipe.getIngredients());
         recipeDto.setLikes(recipe.getLikes());
-
-        List<RecipeComment> comments = new ArrayList<RecipeComment>(recipe.getRecipeComments().values());
-        recipeDto.setComments(comments);
+        recipeDto.setComments(recipe.getRecipeComments());
 
         return recipeDto;
 
