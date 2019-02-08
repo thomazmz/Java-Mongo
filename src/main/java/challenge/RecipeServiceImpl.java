@@ -41,9 +41,9 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public void update(String id, Recipe recipe) {
 		mongoOperations.updateFirst(
-				Query.query(Criteria.where("id").is(id)),
-				Update.update("title", recipe.getTitle()).set("description", recipe.getDescription()).set("ingredients", recipe.getIngredients()),
-				Recipe.class);
+			Query.query(Criteria.where("id").is(id)),
+			Update.update("title", recipe.getTitle()).set("description", recipe.getDescription()).set("ingredients", recipe.getIngredients()),
+			Recipe.class);
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public class RecipeServiceImpl implements RecipeService {
 		// Ambas as implementações abaixo passam nos testes.
 
 		mongoOperations.updateFirst(
-				Query.query(Criteria.where("id").is(id)),
-				new Update().addToSet("likes", userId),
-				Recipe.class);
+			Query.query(Criteria.where("id").is(id)),
+			new Update().addToSet("likes", userId),
+			Recipe.class);
 
 //		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
 //
@@ -78,9 +78,9 @@ public class RecipeServiceImpl implements RecipeService {
 		// Ambas as implementações abaixo passam nos testes.
 
 		mongoOperations.updateFirst(
-				Query.query(Criteria.where("id").is(id)),
-				new Update().pull("likes", userId),
-				Recipe.class);
+			Query.query(Criteria.where("id").is(id)),
+			new Update().pull("likes", userId),
+			Recipe.class);
 
 //		Recipe recipeInstance = recipeRepository.findById(id).orElse(null);
 //
@@ -108,10 +108,15 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public void updateComment(String id, String commentId, RecipeComment recipeComment) {
 
-		mongoOperations.findAndModify(
-			Query.query(Criteria.where("id").is(id)),
-			new Update().set("comments", recipeComment),
+		mongoOperations.updateFirst(
+			Query.query(Criteria.where("id").is(id).and("comments.id").is(commentId)),
+			Update.update("comments.$.comment", recipeComment.getComment()),
 			Recipe.class);
+
+//		mongoOperations.findAndModify(
+//			Query.query(Criteria.where("id").is(id)),
+//			new Update().set("comments", recipeComment),
+//			Recipe.class);
 
 	}
 
