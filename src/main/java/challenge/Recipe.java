@@ -1,11 +1,9 @@
 package challenge;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +21,7 @@ public class Recipe implements Serializable {
 
     private List<String> likes;
 
-    private List<RecipeComment> recipeComments;
+    private List<RecipeComment> comments;
 
     // Constructors
 
@@ -58,8 +56,8 @@ public class Recipe implements Serializable {
         return this.likes;
     }
 
-    public List<RecipeComment> getRecipeComments() {
-        return this.recipeComments;
+    public List<RecipeComment> getComments() {
+        return this.comments;
     }
 
 //    public List<RecipeComment> getCommentsAsList() {
@@ -85,8 +83,8 @@ public class Recipe implements Serializable {
         this.likes = likes;
     }
 
-    public void setRecipeComments(List<RecipeComment> comments) {
-        this.recipeComments = comments;
+    public void setComments(List<RecipeComment> comments) {
+        this.comments = comments;
     }
 
     // Methods
@@ -104,15 +102,15 @@ public class Recipe implements Serializable {
     }
 
     public void addRecipeComment (RecipeComment recipeComment) {
-        if(this.recipeComments != null) {
-            this.recipeComments.add(recipeComment);
+        if(this.comments != null) {
+            this.comments.add(recipeComment);
         } else {
-            this.setRecipeComments(Arrays.asList(recipeComment));
+            this.setComments(Arrays.asList(recipeComment));
         }
     }
 
     public void removeRecipeComment (String commentId) {
-        this.recipeComments.removeIf(obj -> obj.getId() == commentId);
+        this.comments.removeIf(obj -> obj.getId() == commentId);
     }
 
 }

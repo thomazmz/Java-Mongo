@@ -98,7 +98,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 		mongoOperations.updateFirst(
 			Query.query(Criteria.where("id").is(id)),
-			new Update().addToSet("recipeComments", recipeComment),
+			new Update().addToSet("comments", recipeComment),
 			Recipe.class);
 
 		return recipeComment;
@@ -110,7 +110,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 		mongoOperations.findAndModify(
 			Query.query(Criteria.where("id").is(id)),
-			new Update().set("recipe.recipeComments", recipeComment),
+			new Update().set("comments", recipeComment),
 			Recipe.class);
 
 	}
@@ -120,7 +120,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 		mongoOperations.updateFirst(
 			Query.query(Criteria.where("id").is(id)),
-			new Update().pull("recipeComments", Query.query(Criteria.where("id").is(commentId))),
+			new Update().pull("comments", Query.query(Criteria.where("id").is(commentId))),
 			Recipe.class
 		);
 

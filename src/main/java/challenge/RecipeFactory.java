@@ -2,9 +2,6 @@ package challenge;
 
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class RecipeFactory {
 
@@ -16,7 +13,7 @@ public class RecipeFactory {
         recipeDto.setDescription(recipe.getDescription());
         recipeDto.setIngredients(recipe.getIngredients());
         recipeDto.setLikes(recipe.getLikes());
-        recipeDto.setComments(recipe.getRecipeComments());
+        recipeDto.setComments(recipe.getComments());
 
         return recipeDto;
 
